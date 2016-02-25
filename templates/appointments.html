@@ -3,7 +3,7 @@
   <li class='logo'><a href="#/home">Brew4Two</a></li>
   <li ><a href="#/home">Landing Page</a></li>
   <li ><a href="#/appointments">My Appointments</a></li>
-  <li ><a href="#" ng-click='signout()' ng-show='isAuth()'>logout</a></li>
+  <li ><a href="#" ng-click='signout()' ng-show='isAuth()'>Logout</a></li>
 </ul>
 
 <!-- page header -->
@@ -24,6 +24,7 @@
             <th>First</th>
             <th>Last</th>
             <th>Location</th>
+            <th>Address</th>
             <th>Day</th>
             <th>Time</th>
             <th>Action</th>
@@ -33,11 +34,12 @@
 
         <tbody>
           <tr ng-repeat="confirmAppt in confirmed">
-            <td>guest first</td>
-            <td>guest last</td>
-            <td>location</td>
-            <td>day</td>
-            <td>time</td>
+            <td>{{confirmAppt.firstName}}</td>
+            <td>{{confirmAppt.lastName}}</td>
+            <td>{{confirmAppt.shop.name}}</td>
+            <td>{{confirmAppt.shop.formatted_address}}</td>
+            <td>{{moment().format(confirmAppt.day)}}</td>
+            <td>{{confirmAppt.time}}</td>
             <td><button class="btn btn-primary" ng-click="accept()">Accept</button></td>
             <td><button class="btn btn-danger" ng-click="deny()">Deny</button></td>
           </tr>
@@ -66,7 +68,7 @@
             <td>{{hostAppt.lastName}}</td>
             <td>{{hostAppt.shop.name}}</td>
             <td>{{hostAppt.shop.formatted_address}}</td>
-            <td>{{hostAppt.day}}</td>
+            <td>{{hostAppt.day.split('T')[0].replace('-', '').replace('-', '')}}</td>
             <td>{{hostAppt.time}}</td>
             <td><button class="btn btn-primary" ng-click="accept()">Accept</button></td>
             <td><button class="btn btn-danger" ng-click="deny()">Deny</button></td>
