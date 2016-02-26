@@ -33,7 +33,7 @@ app.post('/createAppointment', function(req, res){
 
 // finds appointments for a specific store by shopId
 app.post('/getAppointments', function(req, res){
-// shopId is in the request
+  // shopId is in the request
   var shopId = {
     id: req.body.id
   };
@@ -66,7 +66,7 @@ app.post('/filterAppointments', function(req, res){
       }
 
       // case: user is the host
-      if(doc[i].email === email){
+      if(doc[i].email === email && doc[i].guests.length > 0){
         filteredAppointments.hosting.push(doc[i]);
       }
 
@@ -87,58 +87,72 @@ app.post('/sendJoinRequest', function(req, res){
   var secret = "brewed";
   var email = jwt.decode(currentUserId, secret).email;
   var appointment = req.body.appointment;
+  var first = req.body.appointment.firstName;
+  var last = req.body.appointment.lastName;
 
-  db.appointments.update({time: appointment.time}, { $set: { appointmentStatus: 'pending' }, $push: { guests: email } }, function(err, appt){
-  });
-});
-
-// fetches all appointments and sends back to the controller
-app.get('/fetchAppointmentsDashboardData', function(req, res){
-  db.appointments.find({}, function(err, appts){
-    res.send(appts);
-  });
-});
-
-// posts the user's info in the users table
-app.post('/signup', function(req,res){
-  db.users.insert(req.body, function(err, doc){
-    if(err){
-      console.log(err);
-    }
+  db.appointments.update({time: appointment.time},
+    {
+      $set: { appointmentStatus: 'pending'},
+      $push: { guests: email}
+    },
+    function(err, appt){
+    });
   });
 
-  res.send('/signin');
-});
-
-// renders sign in
-app.get('/signin', function(req, res){
-  res.render('/signin');
-});
-
-// authenticates user's email in the database and assigns token if exists
-// access to "appointments" page is handled in the controller
-app.post('/signin', function(req, res){
-  var email = req.body.email;
-  var password = req.body.password;
-
-  db.users.find({email:email}, function(err, exists){
-    if(!exists.length){
-      res.send(false);
-    }
-
-    else {
-      var payload = { email: email };
-      var secret = 'brewed';
-
-      // encode token
-      var token = jwt.encode(payload, secret);
-
-      res.send(token);
-    }
+  // fetches all appointments and sends back to the controller
+  app.get('/fetchAppointmentsDashboardData', function(req, res){
+    db.appointments.find({}, function(err, appts){
+      res.send(appts);
+    });
   });
-});
+
+  // posts the user's info in the users table
+  app.post('/signup', function(req,res){
+    db.users.insert(req.body, function(err, doc){
+      if(err){
+        console.log(err);
+      }
+    });
+
+    res.send('/signin');
+  });
+
+  // renders sign in
+  app.get('/signin', function(req, res){
+    res.render('/signin');
+  });
+
+  // authenticates user's email in the database and assigns token if exists
+  // access to "appointments" page is handled in the controller
+  app.post('/signin', function(req, res){
+    var email = req.body.email;
+    var password = req.body.password;
+
+    db.users.find({email:email}, function(err, exists){
+      if(!exists.length){
+        res.send(false);
+      }
+
+      else {
+        var payload = { email: email };
+        var secret = 'brewed';
+
+        // encode token
+        var token = jwt.encode(payload, secret);
+
+        res.send(token);
+      }
+    });
+  });
+
+  app.post('/acceptAppt', function(req, res){
+    console.log('++line142 server.js', req.body);
+    db.appointments.update({time: req.body.time}, { $set: { appointmentStatus: 'scheduled', guests: [] }}, function(err, appt){
+      res.send(true);
+    });
+  });
 
 
-// sets up server on the process environment port or port 8000
-app.listen(process.env.PORT || 8000);
-console.log('server running on port 8000');
+  // sets up server on the process environment port or port 8000
+  app.listen(process.env.PORT || 8000);
+  console.log('server running on port 8000');
